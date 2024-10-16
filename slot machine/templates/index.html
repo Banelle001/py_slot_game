@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slot Machine Game</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 400px; margin: 0 auto; padding: 20px; text-align: center; }
+        .result, .error { margin: 10px 0; font-weight: bold; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1 style="text-align:center; font-family: Arial, sans-serif; font-size:30px;" > WELCOME TO BANELLE001 SLOT MACHINE </h1>
+    <div class="container">
+        <h1>Slot Machine Game</h1>
+        <p>Current Balance: R<span id="balance"></span></p>
+
+        <div>
+            <label for="bet">Enter your bet:</label>
+            <input type="number" id="bet" step="0.01" placeholder="Bet Amount" />
+        </div>
+
+        <button id="playButton">Play Slot</button>
+
+        <div class="result" id="spinResult"></div>
+        <div class="error" id="errorMsg"></div>
+
+        <h3>Results of Spin:</h3>
+        <p id="spinDisplay">-</p>
+    </div>
+
+    <script>
+        document.getElementById('playButton').addEventListener('click', function() {
+            // Clear previous results and errors
+            document.getElementById('spinResult').innerText = '';
+            document.getElementById('errorMsg').innerText = '';
+
+            const bet = document.getElementById('bet').value;
+
+            fetch('/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'bet': bet
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById('errorMsg').innerText = data.error;
+                } else {
+                    document.getElementById('spinDisplay').innerText = data.spin.join(' | ');
+                    document.getElementById('spinResult').innerText = data.result;
+                    document.getElementById('balance').innerText = data.balance.toFixed(2);
+                }
+            })
+            .catch(err => {
+                document.getElementById('errorMsg').innerText = "An error occurred. Please try again.";
+            });
+        });
+    </script>
+</body>
+</html>
